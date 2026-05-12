@@ -93,6 +93,17 @@ li{
 margin-bottom:6px;
 }
 
+a{
+color:#1976d2;
+text-decoration:none;
+color:black;
+}
+
+a:hover{
+text-decoration:underline;
+color:black;
+}
+
 </style>
 </head>
 
@@ -186,27 +197,37 @@ let grouped = {};
 
 lines.forEach(line=>{
 
-line=line.trim();
+line = line.trim();
 
 if(!line || line.includes("Delete link")) return;
 
-let parts=line.split("\t");
+let parts = line.split("\t");
 
 if(parts.length < 5) return;
 
-let issue=parts[0].trim();
-let status=parts[1].trim();
-let assignee=parts[2].trim();
-let start=parts[3].trim();
-let due=parts[4].trim();
+let issue = parts[0].trim();
+let status = parts[1].trim();
+let assignee = parts[2].trim();
+let start = parts[3].trim();
+let due = parts[4].trim();
 
-if(!assignee) return;
+if (!assignee) {
+    assignee = "Unassigned";
+}
 
 if(!validStatus.includes(status)) return;
 
-if(!grouped[assignee]) grouped[assignee]=[];
+if(!grouped[assignee]) grouped[assignee] = [];
 
-grouped[assignee].push(`${status} | ${issue}`);
+let ticketNumberMatch = issue.match(/\d+/);
+
+let ticketNumber = ticketNumberMatch ? ticketNumberMatch[0] : null;
+
+let issueLink = ticketNumber
+? `<a href="https://redmine.sandmansystems.com/issues/${ticketNumber}" target="_blank">${issue}</a>`
+: issue;
+
+grouped[assignee].push(`${status} | ${issueLink}`);
 
 });
 
@@ -216,27 +237,31 @@ render(grouped);
 
 function render(grouped){
 
-let html="";
+let html = "";
 
-for(let assignee in grouped){
+let sortedAssignees = Object.keys(grouped).sort((a,b)=>
+a.localeCompare(b)
+);
 
-html+=`<div class="assignee"><h3>${assignee}</h3><ul>`;
+sortedAssignees.forEach(assignee=>{
+
+html += `<div class="assignee"><h3>${assignee}</h3><ul>`;
 
 grouped[assignee].forEach(task=>{
-html+=`<li>${task}</li>`;
+html += `<li>${task}</li>`;
 });
 
-html+="</ul></div>";
+html += "</ul></div>";
 
-}
+});
 
-document.getElementById("output").innerHTML=html;
+document.getElementById("output").innerHTML = html;
 
 }
 
 function copyOutput(){
 
-let text=document.getElementById("output").innerText;
+let text = document.getElementById("output").innerText;
 
 navigator.clipboard.writeText(text);
 
@@ -246,15 +271,15 @@ alert("Copied to clipboard");
 
 function clearText(){
 
-document.getElementById("inputText").value="";
-document.getElementById("output").innerHTML="";
+document.getElementById("inputText").value = "";
+document.getElementById("output").innerHTML = "";
 
 }
 
 function selectAll(){
 
 document.querySelectorAll(".status-grid input").forEach(cb=>{
-cb.checked=true;
+cb.checked = true;
 });
 
 }
@@ -262,7 +287,7 @@ cb.checked=true;
 function clearAll(){
 
 document.querySelectorAll(".status-grid input").forEach(cb=>{
-cb.checked=false;
+cb.checked = false;
 });
 
 }
