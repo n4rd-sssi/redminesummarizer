@@ -247,7 +247,16 @@ sortedAssignees.forEach(assignee=>{
 
 html += `<div class="assignee"><h3>${assignee}</h3><ul>`;
 
-grouped[assignee].forEach(task=>{
+grouped[assignee]
+.sort((a,b)=>{
+
+let numA = parseInt(a.match(/\d+/)?.[0] || 0);
+let numB = parseInt(b.match(/\d+/)?.[0] || 0);
+
+return numA - numB;
+
+})
+.forEach(task=>{
 html += `<li>${task}</li>`;
 });
 
