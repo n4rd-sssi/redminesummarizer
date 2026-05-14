@@ -155,6 +155,12 @@ color:black;
 <div class="buttons">
 <button class="generate" onclick="generate()">Generate</button>
 <button class="clear" onclick="clearText()">Clear</button>
+
+<label style="display:flex;align-items:center;gap:6px;margin-left:10px;">
+<input type="checkbox" id="includeStatus" checked>
+Include Status
+</label>
+
 </div>
 
 </div>
@@ -227,7 +233,15 @@ let issueLink = ticketNumber
 ? `<a href="https://redmine.sandmansystems.com/issues/${ticketNumber}" target="_blank">${issue}</a>`
 : issue;
 
-grouped[assignee].push(`${status} | ${issueLink}`);
+let includeStatus = document.getElementById("includeStatus").checked;
+
+if(includeStatus){
+    grouped[assignee].push(`${status} | ${issueLink}`);
+}
+    
+else{
+    grouped[assignee].push(`${issueLink}`);
+}
 
 });
 
