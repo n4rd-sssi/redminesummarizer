@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Redmine Task Summarizer V2</title>
+
 <link rel="icon" type="image/png" href="favicon.png">
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
@@ -10,101 +13,161 @@
 <style>
 
 body{
-font-family:'Montserrat',sans-serif;
-background:#f4f6fb;
-margin:0;
-padding:40px;
+    font-family:'Montserrat',sans-serif;
+    background:#f4f6fb;
+    margin:0;
+    padding:40px;
 }
 
 .container{
-max-width:1200px;
-margin:auto;
+    max-width:1200px;
+    margin:auto;
 }
 
 h1{
-text-align:center;
-margin-bottom:25px;
-font-family:'Montserrat',sans-serif;
+    text-align:center;
+    margin-bottom:25px;
+    font-family:'Montserrat',sans-serif;
 }
 
 .card{
-background:white;
-border-radius:10px;
-padding:25px;
-box-shadow:0 4px 15px rgba(0,0,0,0.08);
-margin-bottom:20px;
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom:20px;
 }
 
 textarea{
-width:100%;
-height:240px;
-padding:12px;
-border-radius:6px;
-border:1px solid #ccc;
-font-family:'Montserrat', sans-serif;
-font-size:14px;
-resize:vertical;
+    width:100%;
+    height:240px;
+    padding:12px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-family:'Montserrat',sans-serif;
+    font-size:14px;
+    resize:vertical;
+    box-sizing:border-box;
 }
 
 .buttons{
-margin-top:15px;
-display:flex;
-gap:10px;
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
 }
 
 button{
-padding:10px 18px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-weight:600;
-font-family:'Montserrat', sans-serif;
+    padding:10px 18px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+    font-family:'Montserrat',sans-serif;
 }
 
-.generate{background:#4CAF50;color:white;}
-.clear{background:#888;color:white;}
-.copy{background:#1976d2;color:white;margin-bottom:10px;}
-.small{background:#ddd;}
+button:hover{
+    opacity:0.9;
+}
+
+.generate{
+    background:#4CAF50;
+    color:white;
+}
+
+.clear{
+    background:#888;
+    color:white;
+}
+
+.copy{
+    background:#1976d2;
+    color:white;
+    margin-bottom:10px;
+}
+
+.small{
+    background:#ddd;
+}
 
 .status-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:8px;
-margin-top:10px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-top:10px;
 }
 
 .status-grid label{
-display:flex;
-align-items:center;
-gap:6px;
-font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:14px;
 }
 
 .assignee{
-margin-top:20px;
+    margin-top:20px;
 }
 
 .assignee h3{
-border-bottom:2px solid #eee;
-padding-bottom:5px;
+    border-bottom:2px solid #eee;
+    padding-bottom:5px;
 }
 
 li{
-margin-bottom:6px;
+    margin-bottom:6px;
 }
 
 a{
-color:#1976d2;
-text-decoration:none;
-color:black;
+    color:black;
+    text-decoration:none;
 }
 
 a:hover{
-text-decoration:underline;
-color:black;
+    text-decoration:underline;
+    color:black;
+}
+
+.info{
+    font-size:13px;
+    color:#666;
+    margin-top:10px;
+    line-height:1.5;
+}
+
+.summary{
+    font-size:13px;
+    color:#666;
+    margin-bottom:15px;
+}
+
+.empty-output{
+    color:#888;
+    font-style:italic;
+}
+
+@media(max-width:800px){
+
+    body{
+        padding:20px;
+    }
+
+    .status-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:500px){
+
+    .status-grid{
+        grid-template-columns:1fr;
+    }
+
 }
 
 </style>
+
 </head>
 
 <body>
@@ -113,61 +176,166 @@ color:black;
 
 <h1>Redmine Task Summarizer</h1>
 
+<!-- STATUS FILTER -->
+
 <div class="card">
 
 <h3>Status Filter</h3>
 
 <div>
-<button class="small" onclick="selectAll()">Select All</button>
-<button class="small" onclick="clearAll()">Clear All</button>
+    <button class="small" onclick="selectAll()">Select All</button>
+    <button class="small" onclick="clearAll()">Clear All</button>
 </div>
 
 <div class="status-grid">
 
-<label><input type="checkbox" value="New" checked>New</label>
-<label><input type="checkbox" value="Briefing Request">Briefing Request</label>
-<label><input type="checkbox" value="In Progress" checked>In Progress</label>
-<label><input type="checkbox" value="Pre-QA Request">Pre-QA Request</label>
-<label><input type="checkbox" value="QA Request" checked>QA Request</label>
-<label><input type="checkbox" value="QA Process">QA Process</label>
-<label><input type="checkbox" value="Feedback" checked>Feedback</label>
-<label><input type="checkbox" value="Final QA">Final QA</label>
-<label><input type="checkbox" value="PM Review">PM Review</label>
-<label><input type="checkbox" value="Specs Review">Specs Review</label>
-<label><input type="checkbox" value="Change of QA Start Date">Change of QA Start Date</label>
-<label><input type="checkbox" value="Change of Deployment Date">Change of Deployment Date</label>
-<label><input type="checkbox" value="Change Project Name">Change Project Name</label>
-<label><input type="checkbox" value="Ready for Inspection">Ready for Inspection</label>
-<label><input type="checkbox" value="Deploy Request">Deploy Request</label>
-<label><input type="checkbox" value="Development Request">Development Request</label>
-<label><input type="checkbox" value="On Hold">On Hold</label>
-<label><input type="checkbox" value="Closed">Closed</label>
-<label><input type="checkbox" value="Rejected">Rejected</label>
+<label>
+    <input type="checkbox" value="New" checked>
+    New
+</label>
 
-</div>
+<label>
+    <input type="checkbox" value="Briefing Request">
+    Briefing Request
+</label>
 
-</div>
+<label>
+    <input type="checkbox" value="In Progress" checked>
+    In Progress
+</label>
 
-<div class="card">
+<label>
+    <input type="checkbox" value="Pre-QA Request">
+    Pre-QA Request
+</label>
 
-<textarea id="inputText" placeholder="Paste Redmine tasks here (Please make sure to copy everything including the Dates and the Action Icons of the FRs you want to sort)..."></textarea>
+<label>
+    <input type="checkbox" value="QA Request" checked>
+    QA Request
+</label>
 
-<div class="buttons">
-<button class="generate" onclick="generate()">Generate</button>
-<button class="clear" onclick="clearText()">Clear</button>
+<label>
+    <input type="checkbox" value="QA Process">
+    QA Process
+</label>
 
-<label style="display:flex;align-items:center;gap:6px;margin-left:10px;">
-<input type="checkbox" id="includeStatus" checked>
-Include Status
+<label>
+    <input type="checkbox" value="Feedback" checked>
+    Feedback
+</label>
+
+<label>
+    <input type="checkbox" value="Final QA">
+    Final QA
+</label>
+
+<label>
+    <input type="checkbox" value="PM Review">
+    PM Review
+</label>
+
+<label>
+    <input type="checkbox" value="Specs Review">
+    Specs Review
+</label>
+
+<label>
+    <input type="checkbox" value="Change of QA Start Date">
+    Change of QA Start Date
+</label>
+
+<label>
+    <input type="checkbox" value="Change of Deployment Date">
+    Change of Deployment Date
+</label>
+
+<label>
+    <input type="checkbox" value="Change Project Name">
+    Change Project Name
+</label>
+
+<label>
+    <input type="checkbox" value="Ready for Inspection">
+    Ready for Inspection
+</label>
+
+<label>
+    <input type="checkbox" value="Deploy Request">
+    Deploy Request
+</label>
+
+<label>
+    <input type="checkbox" value="Development Request">
+    Development Request
+</label>
+
+<label>
+    <input type="checkbox" value="On Hold">
+    On Hold
+</label>
+
+<label>
+    <input type="checkbox" value="Closed">
+    Closed
+</label>
+
+<label>
+    <input type="checkbox" value="Rejected">
+    Rejected
 </label>
 
 </div>
 
 </div>
 
+
+<!-- INPUT -->
+
 <div class="card">
 
-<button class="copy" onclick="copyOutput()">Copy Output</button>
+<textarea
+    id="inputText"
+    placeholder="Paste Redmine tasks here...
+
+Supported formats:
+
+1. Standard task/subtask format
+2. Redmine issue-list format
+"
+></textarea>
+
+<div class="buttons">
+
+    <button class="generate" onclick="generate()">
+        Generate
+    </button>
+
+    <button class="clear" onclick="clearText()">
+        Clear
+    </button>
+
+    <label style="display:flex;align-items:center;gap:6px;margin-left:10px;">
+        <input type="checkbox" id="includeStatus" checked>
+        Include Status
+    </label>
+
+</div>
+
+<div class="info">
+    The summarizer automatically detects which Redmine format was pasted.
+    Both formats may also be pasted into the same input box.
+</div>
+
+</div>
+
+
+<!-- OUTPUT -->
+
+<div class="card">
+
+<button class="copy" onclick="copyOutput()">
+    Copy Output
+</button>
 
 <div id="output"></div>
 
@@ -175,143 +343,662 @@ Include Status
 
 </div>
 
+
 <script>
+
+/*
+=========================================================
+GET SELECTED STATUSES
+=========================================================
+*/
 
 function getSelectedStatuses(){
 
-let checkboxes = document.querySelectorAll(".status-grid input:checked");
+    let checkboxes =
+        document.querySelectorAll(".status-grid input:checked");
 
-let statuses = [];
+    let statuses = [];
 
-checkboxes.forEach(cb=>{
-statuses.push(cb.value);
-});
+    checkboxes.forEach(cb=>{
+        statuses.push(cb.value);
+    });
 
-return statuses;
+    return statuses;
 
 }
+
+
+/*
+=========================================================
+PARSE TASK LINE
+
+Supports two input formats:
+
+---------------------------------------------------------
+
+FORMAT 1
+
+Feature #113752: Add PTO Tab...
+Final QA
+Punzalan, Maurice Joyce
+07/01/2026
+08/31/2026
+
+Tab-separated:
+
+0 = Issue
+1 = Status
+2 = Assignee
+3 = Start Date
+4 = Due Date
+
+---------------------------------------------------------
+
+FORMAT 2
+
+122441
+Parañaque OBO Web...
+Feedback
+Feature #122430
+Add confirmation prompt...
+New
+Normal
+Aban, Marvin
+...
+
+Tab-separated:
+
+0 = #
+1 = Project
+2 = Tracker
+3 = Parent Task
+4 = Subject
+5 = Status
+6 = Priority
+7 = Assignee
+8 = % Done
+9 = % QA Done
+10 = Updated
+11 = Updated QA Start Date
+12 = Updated Deployment Date
+13 = Due Date
+
+NOTE:
+
+When copying from Redmine, columns 8 onward may
+sometimes appear on the next physical line.
+
+That is OK because the summarizer currently only
+needs columns 0 through 7.
+=========================================================
+*/
+
+function parseTaskLine(rawLine){
+
+    // Remove carriage return but preserve tabs.
+    rawLine = rawLine.replace(/\r/g,"");
+
+    if(!rawLine.trim()){
+        return null;
+    }
+
+
+    /*
+    Ignore action/helper rows generated by Redmine.
+    */
+
+    if(
+        rawLine.includes("Delete link") ||
+        rawLine.trim() === "Actions"
+    ){
+        return null;
+    }
+
+
+    let parts = rawLine.split("\t");
+
+
+    /*
+    Some Redmine list rows begin with an empty tab:
+
+        [blank] 122436 Project ...
+
+    Remove ONLY leading empty columns.
+    */
+
+    while(
+        parts.length > 0 &&
+        parts[0].trim() === ""
+    ){
+        parts.shift();
+    }
+
+
+    if(parts.length === 0){
+        return null;
+    }
+
+
+    /*
+    =====================================================
+    FORMAT 2
+    REDMINE ISSUE LIST
+    =====================================================
+    */
+
+    let firstColumn = parts[0].trim();
+
+
+    if(
+        /^\d+$/.test(firstColumn) &&
+        parts.length >= 6
+    ){
+
+        let ticketNumber =
+            firstColumn;
+
+        let project =
+            parts[1]?.trim() || "";
+
+        let tracker =
+            parts[2]?.trim() || "";
+
+        let parentTask =
+            parts[3]?.trim() || "";
+
+        let subject =
+            parts[4]?.trim() || "";
+
+        let status =
+            parts[5]?.trim() || "";
+
+        let priority =
+            parts[6]?.trim() || "";
+
+        let assignee =
+            parts[7]?.trim() || "Unassigned";
+
+
+        /*
+        Prevent incomplete/random numeric rows from
+        being interpreted as tickets.
+        */
+
+        if(!subject || !status){
+            return null;
+        }
+
+
+        /*
+        Construct standard Redmine-style display:
+
+        Feedback #122441: Subject
+        Feature #122430: Subject
+        Deployment #122397: Subject
+        */
+
+        let issue;
+
+        if(tracker){
+
+            issue =
+                `${tracker} #${ticketNumber}: ${subject}`;
+
+        }else{
+
+            issue =
+                `#${ticketNumber}: ${subject}`;
+
+        }
+
+
+        return{
+
+            format:"issue-list",
+
+            ticketNumber:ticketNumber,
+
+            issue:issue,
+
+            status:status,
+
+            assignee:assignee,
+
+            project:project,
+
+            tracker:tracker,
+
+            parentTask:parentTask,
+
+            priority:priority
+
+        };
+
+    }
+
+
+
+    /*
+    =====================================================
+    FORMAT 1
+    ORIGINAL TASK / SUBTASK COPY FORMAT
+    =====================================================
+    */
+
+    if(parts.length >= 5){
+
+        let issue =
+            parts[0].trim();
+
+        /*
+        A valid old-format task should contain:
+
+        Feature #12345
+        Feedback #12345
+        Deployment #12345
+        etc.
+        */
+
+        let ticketNumberMatch =
+            issue.match(/#(\d+)/);
+
+
+        if(!ticketNumberMatch){
+            return null;
+        }
+
+
+        let ticketNumber =
+            ticketNumberMatch[1];
+
+        let status =
+            parts[1]?.trim() || "";
+
+        let assignee =
+            parts[2]?.trim() || "Unassigned";
+
+        let start =
+            parts[3]?.trim() || "";
+
+        let due =
+            parts[4]?.trim() || "";
+
+
+        if(!status){
+            return null;
+        }
+
+
+        return{
+
+            format:"standard",
+
+            ticketNumber:ticketNumber,
+
+            issue:issue,
+
+            status:status,
+
+            assignee:assignee,
+
+            start:start,
+
+            due:due
+
+        };
+
+    }
+
+
+    /*
+    Anything else is ignored.
+
+    This includes continuation rows such as:
+
+    08/18/2026 09:34 AM
+    08/18/2026
+    08/18/2026
+    08/18/2026
+    Actions
+    */
+
+    return null;
+
+}
+
+
+/*
+=========================================================
+GENERATE SUMMARY
+=========================================================
+*/
 
 function generate(){
 
-let validStatus = getSelectedStatuses();
+    let validStatus =
+        getSelectedStatuses();
 
-let text = document.getElementById("inputText").value;
+    let text =
+        document.getElementById("inputText").value;
 
-let lines = text.split("\n");
+    let includeStatus =
+        document.getElementById("includeStatus").checked;
 
-let grouped = {};
+    let lines =
+        text.split("\n");
 
-lines.forEach(line=>{
+    let grouped = {};
 
-line = line.trim();
+    let totalParsed = 0;
 
-if(!line || line.includes("Delete link")) return;
+    let totalIncluded = 0;
 
-let parts = line.split("\t");
 
-if(parts.length < 5) return;
+    lines.forEach(rawLine=>{
 
-let issue = parts[0].trim();
-let status = parts[1].trim();
-let assignee = parts[2].trim();
-let start = parts[3].trim();
-let due = parts[4].trim();
+        let task =
+            parseTaskLine(rawLine);
 
-if (!assignee) {
-    assignee = "Unassigned";
-}
 
-if(!validStatus.includes(status)) return;
+        if(!task){
+            return;
+        }
 
-if(!grouped[assignee]) grouped[assignee] = [];
 
-let ticketNumberMatch = issue.match(/\d+/);
+        totalParsed++;
 
-let ticketNumber = ticketNumberMatch ? ticketNumberMatch[0] : null;
 
-let issueLink = ticketNumber
-? `<a href="https://redmine.sandmansystems.com/issues/${ticketNumber}" target="_blank">${issue}</a>`
-: issue;
+        /*
+        Apply Status Filter
+        */
 
-let includeStatus = document.getElementById("includeStatus").checked;
+        if(!validStatus.includes(task.status)){
+            return;
+        }
 
-if(includeStatus){
-    grouped[assignee].push(`${status} | ${issueLink}`);
-}
-    
-else{
-    grouped[assignee].push(`${issueLink}`);
-}
 
-});
+        totalIncluded++;
 
-render(grouped);
 
-}
+        /*
+        Group by assignee
+        */
 
-function render(grouped){
+        if(!grouped[task.assignee]){
 
-let html = "";
+            grouped[task.assignee] = [];
 
-let sortedAssignees = Object.keys(grouped).sort((a,b)=>
-a.localeCompare(b)
-);
+        }
 
-sortedAssignees.forEach(assignee=>{
 
-html += `<div class="assignee"><h3>${assignee}</h3><ul>`;
+        grouped[task.assignee].push(task);
 
-grouped[assignee]
-.sort((a,b)=>{
+    });
 
-let numA = parseInt(a.match(/\d+/)?.[0] || 0);
-let numB = parseInt(b.match(/\d+/)?.[0] || 0);
 
-return numA - numB;
-
-})
-.forEach(task=>{
-html += `<li>${task}</li>`;
-});
-
-html += "</ul></div>";
-
-});
-
-document.getElementById("output").innerHTML = html;
+    render(
+        grouped,
+        includeStatus,
+        totalParsed,
+        totalIncluded
+    );
 
 }
+
+
+/*
+=========================================================
+RENDER OUTPUT
+=========================================================
+*/
+
+function render(
+    grouped,
+    includeStatus,
+    totalParsed,
+    totalIncluded
+){
+
+    let html = "";
+
+
+    /*
+    Sort assignees alphabetically.
+    */
+
+    let sortedAssignees =
+        Object.keys(grouped).sort(
+            (a,b)=>a.localeCompare(b)
+        );
+
+
+    /*
+    Nothing passed current status filters.
+    */
+
+    if(sortedAssignees.length === 0){
+
+        document.getElementById("output").innerHTML =
+            `<div class="empty-output">
+                No tasks matched the selected statuses.
+            </div>`;
+
+        return;
+
+    }
+
+
+    /*
+    Small processing summary.
+    */
+
+    html += `
+        <div class="summary">
+            ${totalIncluded} of ${totalParsed}
+            detected task${totalParsed === 1 ? "" : "s"}
+            included.
+        </div>
+    `;
+
+
+    sortedAssignees.forEach(assignee=>{
+
+        html += `
+            <div class="assignee">
+                <h3>${escapeHtml(assignee)}</h3>
+                <ul>
+        `;
+
+
+        /*
+        Sort tickets numerically by ticket ID.
+        */
+
+        grouped[assignee]
+        .sort((a,b)=>{
+
+            let numA =
+                parseInt(a.ticketNumber || 0);
+
+            let numB =
+                parseInt(b.ticketNumber || 0);
+
+            return numA - numB;
+
+        })
+        .forEach(task=>{
+
+
+            let issueText =
+                escapeHtml(task.issue);
+
+
+            let issueLink =
+                task.ticketNumber
+
+                ? `<a
+                    href="https://redmine.sandmansystems.com/issues/${encodeURIComponent(task.ticketNumber)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                   >${issueText}</a>`
+
+                : issueText;
+
+
+            if(includeStatus){
+
+                html += `
+                    <li>
+                        ${escapeHtml(task.status)}
+                        |
+                        ${issueLink}
+                    </li>
+                `;
+
+            }
+
+            else{
+
+                html += `
+                    <li>
+                        ${issueLink}
+                    </li>
+                `;
+
+            }
+
+        });
+
+
+        html += `
+                </ul>
+            </div>
+        `;
+
+    });
+
+
+    document.getElementById("output").innerHTML =
+        html;
+
+}
+
+
+/*
+=========================================================
+HTML ESCAPE
+
+Prevents pasted task names from being interpreted
+as HTML.
+=========================================================
+*/
+
+function escapeHtml(text){
+
+    return String(text)
+
+        .replace(/&/g,"&amp;")
+
+        .replace(/</g,"&lt;")
+
+        .replace(/>/g,"&gt;")
+
+        .replace(/"/g,"&quot;")
+
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/*
+=========================================================
+COPY OUTPUT
+=========================================================
+*/
 
 function copyOutput(){
 
-let text = document.getElementById("output").innerText;
+    let output =
+        document.getElementById("output");
 
-navigator.clipboard.writeText(text);
+    let text =
+        output.innerText.trim();
 
-alert("Copied to clipboard");
+
+    if(!text){
+
+        alert("There is no output to copy.");
+
+        return;
+
+    }
+
+
+    navigator.clipboard
+    .writeText(text)
+    .then(()=>{
+
+        alert("Copied to clipboard");
+
+    })
+    .catch(()=>{
+
+        alert("Unable to copy to clipboard.");
+
+    });
 
 }
+
+
+/*
+=========================================================
+CLEAR
+=========================================================
+*/
 
 function clearText(){
 
-document.getElementById("inputText").value = "";
-document.getElementById("output").innerHTML = "";
+    document.getElementById("inputText").value = "";
+
+    document.getElementById("output").innerHTML = "";
 
 }
+
+
+/*
+=========================================================
+SELECT ALL STATUSES
+=========================================================
+*/
 
 function selectAll(){
 
-document.querySelectorAll(".status-grid input").forEach(cb=>{
-cb.checked = true;
-});
+    document
+    .querySelectorAll(".status-grid input")
+    .forEach(cb=>{
+
+        cb.checked = true;
+
+    });
 
 }
 
+
+/*
+=========================================================
+CLEAR ALL STATUSES
+=========================================================
+*/
+
 function clearAll(){
 
-document.querySelectorAll(".status-grid input").forEach(cb=>{
-cb.checked = false;
-});
+    document
+    .querySelectorAll(".status-grid input")
+    .forEach(cb=>{
+
+        cb.checked = false;
+
+    });
 
 }
 
