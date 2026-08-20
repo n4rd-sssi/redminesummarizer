@@ -91,14 +91,16 @@ button:hover{
     background:#ddd;
 }
 
-.status-grid{
+.status-grid,
+.type-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:8px;
     margin-top:10px;
 }
 
-.status-grid label{
+.status-grid label,
+.type-grid label{
     display:flex;
     align-items:center;
     gap:6px;
@@ -152,7 +154,8 @@ a:hover{
         padding:20px;
     }
 
-    .status-grid{
+    .status-grid,
+    .type-grid{
         grid-template-columns:repeat(2,1fr);
     }
 
@@ -160,7 +163,8 @@ a:hover{
 
 @media(max-width:500px){
 
-    .status-grid{
+    .status-grid,
+    .type-grid{
         grid-template-columns:1fr;
     }
 
@@ -289,12 +293,33 @@ a:hover{
 </div>
 
 
+<!-- TICKET TYPE FILTER -->
+
+<div class="card">
+
+<h3>Ticket Type Filter</h3>
+
+<div>
+    <button class="small" onclick="selectAllTypes()">Select All</button>
+    <button class="small" onclick="clearAllTypes()">Clear All</button>
+</div>
+
+<div class="type-grid" id="ticketTypeGrid">
+    <div class="info">
+        Paste Redmine tasks below to detect ticket types.
+    </div>
+</div>
+
+</div>
+
+
 <!-- INPUT -->
 
 <div class="card">
 
 <textarea
     id="inputText"
+    oninput="updateTicketTypeFilter()"
     placeholder="Paste Redmine tasks here...
 
 Supported formats:
@@ -364,6 +389,132 @@ function getSelectedStatuses(){
     });
 
     return statuses;
+
+}
+
+
+/*
+=========================================================
+GET SELECTED TICKET TYPES
+=========================================================
+*/
+
+function getSelectedTicketTypes(){
+
+    let checkboxes =
+        document.querySelectorAll(".type-grid input:checked");
+
+    let ticketTypes = [];
+
+    checkboxes.forEach(cb=>{
+        ticketTypes.push(cb.value);
+    });
+
+    return ticketTypes;
+
+}
+
+
+/*
+=========================================================
+UPDATE TICKET TYPE FILTER
+
+Ticket types are detected automatically from the
+currently pasted tasks.
+
+Examples:
+
+Feedback #122431  -> Feedback
+Feature #122430   -> Feature
+Deployment #52526 -> Deployment
+=========================================================
+*/
+
+function updateTicketTypeFilter(){
+
+    let grid =
+        document.getElementById("ticketTypeGrid");
+
+    let text =
+        document.getElementById("inputText").value;
+
+    /*
+    Preserve the user's current checkbox selections
+    when the pasted text changes.
+    */
+
+    let previousState = new Map();
+
+    grid
+    .querySelectorAll("input[type='checkbox']")
+    .forEach(cb=>{
+        previousState.set(cb.value, cb.checked);
+    });
+
+
+    let ticketTypes = new Set();
+
+    text
+    .split("\n")
+    .forEach(rawLine=>{
+
+        let task =
+            parseTaskLine(rawLine);
+
+        if(
+            task &&
+            task.ticketType &&
+            task.ticketType !== "Unknown"
+        ){
+            ticketTypes.add(task.ticketType);
+        }
+
+    });
+
+
+    let sortedTypes =
+        Array.from(ticketTypes)
+        .sort((a,b)=>a.localeCompare(b));
+
+
+    if(sortedTypes.length === 0){
+
+        grid.innerHTML = `
+            <div class="info">
+                Paste Redmine tasks below to detect ticket types.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    grid.innerHTML =
+        sortedTypes.map(type=>{
+
+            /*
+            New ticket types default to selected.
+            Existing types keep their previous state.
+            */
+
+            let checked =
+                previousState.has(type)
+                    ? previousState.get(type)
+                    : true;
+
+            return `
+                <label>
+                    <input
+                        type="checkbox"
+                        value="${escapeHtml(type)}"
+                        ${checked ? "checked" : ""}
+                    >
+                    ${escapeHtml(type)}
+                </label>
+            `;
+
+        }).join("");
 
 }
 
@@ -568,6 +719,8 @@ function parseTaskLine(rawLine){
 
             tracker:tracker,
 
+            ticketType:tracker || "Unknown",
+
             parentTask:parentTask,
 
             priority:priority
@@ -611,6 +764,23 @@ function parseTaskLine(rawLine){
         let ticketNumber =
             ticketNumberMatch[1];
 
+        /*
+        Extract the ticket type from the text before
+        the ticket number.
+
+        Example:
+        Feedback #122431: Subject
+        -> Feedback
+        */
+
+        let ticketTypeMatch =
+            issue.match(/^(.+?)\s+#\d+/);
+
+        let ticketType =
+            ticketTypeMatch
+                ? ticketTypeMatch[1].trim()
+                : "Unknown";
+
         let status =
             parts[1]?.trim() || "";
 
@@ -636,6 +806,8 @@ function parseTaskLine(rawLine){
             ticketNumber:ticketNumber,
 
             issue:issue,
+
+            ticketType:ticketType,
 
             status:status,
 
@@ -675,8 +847,20 @@ GENERATE SUMMARY
 
 function generate(){
 
+    /*
+    Refresh detected ticket types before filtering.
+    */
+
+    updateTicketTypeFilter();
+
     let validStatus =
         getSelectedStatuses();
+
+    let validTicketTypes =
+        getSelectedTicketTypes();
+
+    let hasTicketTypeOptions =
+        document.querySelectorAll(".type-grid input").length > 0;
 
     let text =
         document.getElementById("inputText").value;
@@ -713,6 +897,18 @@ function generate(){
         */
 
         if(!validStatus.includes(task.status)){
+            return;
+        }
+
+
+        /*
+        Apply Ticket Type Filter
+        */
+
+        if(
+            hasTicketTypeOptions &&
+            !validTicketTypes.includes(task.ticketType)
+        ){
             return;
         }
 
@@ -780,7 +976,7 @@ function render(
 
         document.getElementById("output").innerHTML =
             `<div class="empty-output">
-                No tasks matched the selected statuses.
+                No tasks matched the selected status and ticket type filters.
             </div>`;
 
         return;
@@ -962,6 +1158,8 @@ function clearText(){
 
     document.getElementById("output").innerHTML = "";
 
+    updateTicketTypeFilter();
+
 }
 
 
@@ -994,6 +1192,44 @@ function clearAll(){
 
     document
     .querySelectorAll(".status-grid input")
+    .forEach(cb=>{
+
+        cb.checked = false;
+
+    });
+
+}
+
+
+/*
+=========================================================
+SELECT ALL TICKET TYPES
+=========================================================
+*/
+
+function selectAllTypes(){
+
+    document
+    .querySelectorAll(".type-grid input")
+    .forEach(cb=>{
+
+        cb.checked = true;
+
+    });
+
+}
+
+
+/*
+=========================================================
+CLEAR ALL TICKET TYPES
+=========================================================
+*/
+
+function clearAllTypes(){
+
+    document
+    .querySelectorAll(".type-grid input")
     .forEach(cb=>{
 
         cb.checked = false;
