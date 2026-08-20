@@ -719,7 +719,9 @@ function parseTaskLine(rawLine){
 
             tracker:tracker,
 
-            ticketType:tracker || "Unknown",
+            ticketType: tracker
+                ? (tracker.match(/([A-Za-z][A-Za-z0-9_-]*)\s*$/)?.[1] || "Unknown")
+                : "Unknown",
 
             parentTask:parentTask,
 
@@ -765,16 +767,19 @@ function parseTaskLine(rawLine){
             ticketNumberMatch[1];
 
         /*
-        Extract the ticket type from the text before
+        Extract ONLY the single word immediately before
         the ticket number.
 
-        Example:
+        Examples:
         Feedback #122431: Subject
         -> Feedback
+
+        Related to QC ZAU System Internal Support - Support #101365: Subject
+        -> Support
         */
 
         let ticketTypeMatch =
-            issue.match(/^(.+?)\s+#\d+/);
+            issue.match(/([A-Za-z][A-Za-z0-9_-]*)\s+#\d+/);
 
         let ticketType =
             ticketTypeMatch
