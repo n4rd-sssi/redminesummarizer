@@ -1004,9 +1004,15 @@ function render(
 
     sortedAssignees.forEach(assignee=>{
 
+        let assigneeCount =
+            grouped[assignee].length;
+
         html += `
             <div class="assignee">
-                <h3>${escapeHtml(assignee)}</h3>
+                <h3>
+                    ${escapeHtml(assignee)}
+                    (${assigneeCount} task${assigneeCount === 1 ? "" : "s"})
+                </h3>
                 <ul>
         `;
 
