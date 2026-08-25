@@ -116,6 +116,23 @@ button:hover{
     padding-bottom:5px;
 }
 
+.status-group{
+    margin:10px 0 14px 0;
+}
+
+.status-group-title{
+    font-weight:400;
+    margin-bottom:6px;
+}
+
+.status-group-tasks{
+    margin-left:56px;
+}
+
+.status-task{
+    margin-bottom:6px;
+}
+
 li{
     margin-bottom:6px;
 }
@@ -1013,7 +1030,6 @@ function render(
                     ${escapeHtml(assignee)}
                     (${assigneeCount} task${assigneeCount === 1 ? "" : "s"})
                 </h3>
-                <ul>
         `;
 
 
@@ -1021,64 +1037,131 @@ function render(
         Sort tickets numerically by ticket ID.
         */
 
-        grouped[assignee]
-        .sort((a,b)=>{
+        let assigneeTasks =
+            grouped[assignee]
+            .slice()
+            .sort((a,b)=>{
 
-            let numA =
-                parseInt(a.ticketNumber || 0);
+                let numA =
+                    parseInt(a.ticketNumber || 0);
 
-            let numB =
-                parseInt(b.ticketNumber || 0);
+                let numB =
+                    parseInt(b.ticketNumber || 0);
 
-            return numA - numB;
+                return numA - numB;
 
-        })
-        .forEach(task=>{
-
-
-            let issueText =
-                escapeHtml(task.issue);
+            });
 
 
-            let issueLink =
-                task.ticketNumber
+        if(includeStatus){
 
-                ? `<a
-                    href="https://redmine.sandmansystems.com/issues/${encodeURIComponent(task.ticketNumber)}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                   >${issueText}</a>`
+            /*
+            Group the assignee's tickets by status.
 
-                : issueText;
+            Output example:
+
+            • QA Request
+                Feature #117752: QCID Validation
+                Feature #117753: QCID Not Verified
+
+            • Feedback
+                Feedback #123456: Sample feedback
+            */
+
+            let statusGroups = {};
+
+            assigneeTasks.forEach(task=>{
+
+                if(!statusGroups[task.status]){
+                    statusGroups[task.status] = [];
+                }
+
+                statusGroups[task.status].push(task);
+
+            });
 
 
-            if(includeStatus){
+            Object.keys(statusGroups).forEach(status=>{
+
+                html += `
+                    <div class="status-group">
+                        <div class="status-group-title">
+                            &#9679; ${escapeHtml(status)}
+                        </div>
+                        <div class="status-group-tasks">
+                `;
+
+
+                statusGroups[status].forEach(task=>{
+
+                    let issueText =
+                        escapeHtml(task.issue);
+
+                    let issueLink =
+                        task.ticketNumber
+
+                        ? `<a
+                            href="https://redmine.sandmansystems.com/issues/${encodeURIComponent(task.ticketNumber)}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                           >${issueText}</a>`
+
+                        : issueText;
+
+
+                    html += `
+                        <div class="status-task">
+                            ${issueLink}
+                        </div>
+                    `;
+
+                });
+
+
+                html += `
+                        </div>
+                    </div>
+                `;
+
+            });
+
+        }
+
+        else{
+
+            html += `<ul>`;
+
+            assigneeTasks.forEach(task=>{
+
+                let issueText =
+                    escapeHtml(task.issue);
+
+                let issueLink =
+                    task.ticketNumber
+
+                    ? `<a
+                        href="https://redmine.sandmansystems.com/issues/${encodeURIComponent(task.ticketNumber)}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                       >${issueText}</a>`
+
+                    : issueText;
+
 
                 html += `
                     <li>
-                        ${escapeHtml(task.status)}
-                        |
                         ${issueLink}
                     </li>
                 `;
 
-            }
+            });
 
-            else{
+            html += `</ul>`;
 
-                html += `
-                    <li>
-                        ${issueLink}
-                    </li>
-                `;
-
-            }
-
-        });
+        }
 
 
         html += `
-                </ul>
             </div>
         `;
 
